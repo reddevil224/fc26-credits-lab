@@ -541,7 +541,18 @@
     const pv = document.getElementById("profitValue");
     pv.textContent = fmt(prof);
     pv.className = "profit " + (prof>=0 ? "good":"bad");
+    const minTarget = 800;
+
+if (sell && buy) {
+  if (prof >= minTarget) {
+    pv.textContent = fmt(prof) + " ✅ (OK)";
+  } else {
+    pv.textContent = fmt(prof) + " ❌ (< " + minTarget + ")";
   }
+}
+pv.className = "profit " + (prof >= minTarget ? "good" : "bad");
+
+  
   buyPrice.addEventListener("input", updateCalc);
   sellPrice.addEventListener("input", updateCalc);
 
@@ -558,8 +569,8 @@
       date: nowParis()
     });
 
-    // Option: update credits now if you want:
-    // state.creditsNow += prof;
+    // Auto-update crédits (tu peux l’activer/désactiver plus tard)
+state.creditsNow = Math.max(0, (Number(state.creditsNow)||0) + prof);
 
     buyPrice.value = "";
     sellPrice.value = "";
