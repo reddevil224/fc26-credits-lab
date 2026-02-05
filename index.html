@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FC26 Credits Lab</title>
+  <meta name="theme-color" content="#0b1220" />
+  <style>
+    :root{
+      --bg:#0b1220;
+      --panel:#0f1b33;
+      --panel2:#0d1730;
+      --stroke:#243b6b;
+      --text:#e5e7eb;
+      --muted:#a5b4fc;
+      --brand:#1d4ed8;
+      --good:#22c55e;
+      --bad:#ef4444;
+      --warn:#f59e0b;
+      --shadow: 0 18px 50px rgba(0,0,0,.35);
+      --r:16px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 700px at 20% 0%, rgba(29,78,216,.18), transparent 55%),
+                  radial-gradient(900px 600px at 85% 15%, rgba(165,180,252,.12), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+    }
+    .topbar{
+      position:sticky; top:0; z-index:10;
+      height:64px;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0 18px;
+      background: rgba(15,27,51,.92);
+      border-bottom:1px solid rgba(36,59,107,.7);
+      backdrop-filter: blur(10px);
+    }
+    .brand{
+      display:flex; flex-direction:column; gap:2px;
+      line-height:1.1;
+    }
+    .brand b{font-size:18px; color:#fff}
+    .brand span{font-size:12px; color:var(--muted)}
+    .top-actions{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    .pill{
+      padding:8px 10px;
+      border:1px solid rgba(36,59,107,.9);
+      background: rgba(17,28,59,.85);
+      border-radius:999px;
+      font-size:12px;
+      color:#e0e7ff;
+      display:flex; gap:8px; align-items:center;
+    }
+    .pill small{opacity:.8}
+    .btn{
+      cursor:pointer;
+      border:0;
+      padding:9px 12px;
+      border-radius:12px;
+      background: var(--brand);
+      color:white;
+      font-weight:600;
+      box-shadow: 0 10px 30px rgba(29,78,216,.25);
+    }
+    .btn.ghost{
+      background: transparent;
+      border:1px solid rgba(36,59,107,.9);
+      box-shadow:none;
+      color:#e0e7ff;
+    }
+    .layout{
+      display:grid;
+      grid-template-columns: 220px 1fr;
+      min-height: calc(100vh - 64px);
+    }
+    .sidenav{
+      background: rgba(13,23,48,.85);
+      border-right:1px solid rgba(36,59,107,.7);
+      padding:14px;
+    }
+    .nav-title{
+      font-size:12px;
+      color:var(--muted);
+      margin:6px 10px 10px;
+    }
+    .nav a{
+      display:flex; align-items:center; gap:10px;
+      padding:10px 10px;
+      border-radius:12px;
+      color:var(--muted);
+      text-decoration:none;
+      border:1px solid transparent;
+      margin:6px 0;
+      user-select:none;
+    }
+    .nav a.active{
+      color:#fff;
+      background: rgba(15,27,51,.8);
+      border-color: rgba(36,59,107,.9);
+    }
+    .nav a:hover{ background: rgba(15,27,51,.55); border-color: rgba(36,59,107,.55); color:#fff;}
+    .content{ padding:18px; }
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap:14px;
+    }
+    .card{
+      background: rgba(15,27,51,.86);
+      border:1px solid rgba(36,59,107,.85);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      padding:14px;
+      min-height: 150px;
+      display:flex; flex-direction:column; gap:10px;
+    }
+    .card h3{
+      margin:0;
+      font-size:14px;
+      color:#fff;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+    .meta{ font-size:12px; color:var(--muted); margin-top:-4px;}
+    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+    .input, select{
+      width:100%;
+      padding:10px 10px;
+      border-radius:12px;
+      background: rgba(11,18,32,.7);
+      border:1px solid rgba(36,59,107,.8);
+      color:var(--text);
+      outline:none;
+    }
+    .input::placeholder{ color: rgba(229,231,235,.45); }
+    .split{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    .kpi{
+      display:flex; gap:12px; align-items:center; justify-content:space-between;
+      padding:12px;
+      border-radius:14px;
+      border:1px solid rgba(36,59,107,.8);
+      background: rgba(17,28,59,.55);
+    }
+    .kpi b{font-size:16px}
+    .kpi span{font-size:12px; color:var(--muted)}
+    .tag{
+      font-size:12px; padding:4px 8px; border-radius:999px;
+      border:1px solid rgba(36,59,107,.8);
+      background: rgba(11,18,32,.6);
+      color:#e0e7ff;
+      white-space:nowrap;
+    }
+    .profit.good{color:var(--good); font-weight:700}
+    .profit.bad{color:var(--bad); font-weight:700}
+    .list{
+      display:flex; flex-direction:column; gap:8px;
+      max-height: 240px; overflow:auto; padding-right:6px;
+    }
+    .item{
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap:10px;
+      padding:10px;
+      border-radius:14px;
+      border:1px solid rgba(36,59,107,.65);
+      background: rgba(11,18,32,.45);
+    }
+    .item b{color:#fff; font-size:13px}
+    .item small{color:var(--muted)}
+    .item .actions{display:flex; gap:8px; align-items:center}
+    .iconbtn{
+      cursor:pointer;
+      border:1px solid rgba(36,59,107,.75);
+      background: rgba(15,27,51,.6);
+      color:#e0e7ff;
+      border-radius:12px;
+      padding:8px 10px;
+      font-weight:700;
+    }
+    .help{font-size:12px; color:rgba(229,231,235,.78); line-height:1.45}
+    .muted{color:var(--muted)}
+    .footer{
+      margin-top:14px;
+      font-size:12px;
+      color:rgba(165,180,252,.85);
+    }
+    @media (max-width: 980px){
+      .layout{grid-template-columns: 1fr}
+      .sidenav{display:none}
+      .grid{grid-template-columns: 1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">
+      <b>FC26 Credits Lab</b>
+      <span>Dashboard trading (manuel & safe) — 10K → 50K</span>
+    </div>
+    <div class="top-actions">
+      <div class="pill"><b id="today"></b> <small>Europe/Paris</small></div>
+      <div class="pill">Sessions: <b>3×/jour</b></div>
+      <button class="btn ghost" id="exportBtn">Exporter CSV</button>
+      <button class="btn" id="resetBtn">Reset</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <aside class="sidenav">
+      <div class="nav-title">Navigation</div>
+      <nav class="nav">
+        <a class="active" href="#" onclick="return false;">Dashboard</a>
+        <a href="#" onclick="return false;">Scanner (manuel)</a>
+        <a href="#" onclick="return false;">Bidding</a>
+        <a href="#" onclick="return false;">Listings</a>
+        <a href="#" onclick="return false;">Evolutions</a>
+        <a href="#" onclick="return false;">Objectifs</a>
+        <a href="#" onclick="return false;">Journal</a>
+        <a href="#" onclick="return false;">Paramètres</a>
+      </nav>
+      <div class="footer">
+        ✅ Pas d’automatisation, pas d’API EA.<br/>
+        ➜ Tu saisis tes trades, l’app calcule et te guide.
+      </div>
+    </aside>
+
+    <main class="content">
+      <div class="grid">
+
+        <!-- Crédits -->
+        <section class="card">
+          <h3>
+            <span>Crédits</span>
+            <span class="tag">Objectif: <b id="goalLabel">50 000</b></span>
+          </h3>
+          <div class="meta">Suivi simple (saisie manuelle)</div>
+
+          <div class="split">
+            <div class="kpi">
+              <div>
+                <span>Crédits actuels</span><br/>
+                <b id="creditsNow">10 000</b>
+              </div>
+              <button class="iconbtn" id="setCreditsBtn">Définir</button>
+            </div>
+            <div class="kpi">
+              <div>
+                <span>Profit net cumulé</span><br/>
+                <b id="profitTotal" class="profit good">0</b>
+              </div>
+              <span class="tag">taxe EA 5%</span>
+            </div>
+          </div>
+
+          <div class="help">
+            Règle : <b>profit net = vente × 0,95 − achat</b>.  
+            Objectif : en low budget, vise des marges <b>+150 à +400</b> en volume (mass-bid).
+          </div>
+        </section>
+
+        <!-- Calculateur -->
+        <section class="card">
+          <h3>
+            <span>Calculateur (taxe + profit)</span>
+            <span class="tag">Flip rapide</span>
+          </h3>
+          <div class="meta">Entre achat/vente, l’app calcule automatiquement</div>
+
+          <div class="split">
+            <div>
+              <label class="muted">Prix d’achat</label>
+              <input class="input" id="buyPrice" type="number" min="0" placeholder="ex: 850" />
+            </div>
+            <div>
+              <label class="muted">Prix de vente</label>
+              <input class="input" id="sellPrice" type="number" min="0" placeholder="ex: 1200" />
+            </div>
+          </div>
+
+          <div class="row">
+            <span class="tag">Taxe (5%) : <b id="taxValue">0</b></span>
+            <span class="tag">Net reçu : <b id="netValue">0</b></span>
+            <span class="tag">Profit : <b id="profitValue" class="profit good">0</b></span>
+          </div>
+
+          <div class="row">
+            <input class="input" id="playerName" placeholder="Nom (ex: '84 fodder', 'Shadow', 'RB→RWB', etc.)" />
+            <button class="btn" id="addTradeBtn">Ajouter au journal</button>
+          </div>
+          <div class="help">Astuce refresh “safe” : au lieu de spam, change légèrement le prix filtre (+100/-100) puis relance la recherche.</div>
+        </section>
+
+        <!-- Session du jour -->
+        <section class="card">
+          <h3>
+            <span>Session du jour</span>
+            <span class="tag" id="sessionTag">—</span>
+          </h3>
+          <div class="meta">Routine 3×/jour : Achats → Relist → Opportunités</div>
+
+          <div class="kpi">
+            <div>
+              <span>Plan recommandé</span><br/>
+              <b id="sessionPlan">Mass-bid 82–85 → relist 1h</b>
+            </div>
+            <button class="iconbtn" id="toggleDoneBtn">Marquer fait</button>
+          </div>
+
+          <div class="help" id="sessionHelp"></div>
+        </section>
+
+        <!-- Watchlist -->
+        <section class="card">
+          <h3>
+            <span>Watchlist</span>
+            <span class="tag"><b id="watchCount">0</b> cibles</span>
+          </h3>
+          <div class="meta">Ajoute tes cibles (joueur/consommable) + prix max</div>
+
+          <div class="split">
+            <input class="input" id="watchName" placeholder="Ex: 84 fodder / Shadow / Hunter" />
+            <input class="input" id="watchMax" type="number" min="0" placeholder="Prix max (enchère)" />
+          </div>
+          <div class="row">
+            <button class="btn" id="addWatchBtn">Ajouter</button>
+            <button class="btn ghost" id="seedWatchBtn">Exemples</button>
+          </div>
+
+          <div class="list" id="watchList"></div>
+        </section>
+
+        <!-- Listings helper -->
+        <section class="card">
+          <h3>
+            <span>Listings</span>
+            <span class="tag">Templates</span>
+          </h3>
+          <div class="meta">Fixe vite un prix sans te perdre</div>
+
+          <div class="split">
+            <div>
+              <label class="muted">Min BIN marché (vu)</label>
+              <input class="input" id="marketMin" type="number" min="0" placeholder="ex: 1100" />
+            </div>
+            <div>
+              <label class="muted">Ton prix BIN</label>
+              <input class="input" id="myBin" type="number" min="0" placeholder="auto" />
+            </div>
+          </div>
+
+          <div class="row">
+            <button class="iconbtn" data-step="-200">-200</button>
+            <button class="iconbtn" data-step="-100">-100</button>
+            <button class="iconbtn" data-step="100">+100</button>
+            <button class="iconbtn" data-step="200">+200</button>
+            <span class="tag">Durée: <b id="durationLabel">1h</b></span>
+            <select id="durationSel" style="max-width:140px">
+              <option value="1h">1h</option>
+              <option value="6h">6h</option>
+              <option value="12h">12h</option>
+            </select>
+          </div>
+
+          <div class="help">
+            Réglage de base : <b>BIN = Min marché − 100</b> (ou égal si ça part vite).  
+            Si ça ne vend pas : baisse petit à petit (−100) au relist.
+          </div>
+        </section>
+
+        <!-- Journal -->
+        <section class="card">
+          <h3>
+            <span>Journal (tes trades)</span>
+            <span class="tag"><b id="tradeCount">0</b> entrées</span>
+          </h3>
+          <div class="meta">Tu vois ton profit réel, et tu sais ce qui marche</div>
+
+          <div class="list" id="tradeList"></div>
+
+          <div class="help">Conseil : garde tes 2 meilleures méthodes et stop le reste (sinon tu t’éparpilles).</div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+<script>
+  const LS_KEY = "fc26_credits_lab_v1";
+
+  const fmt = (n) => (Number(n)||0).toLocaleString("fr-FR");
+  const nowParis = () => new Intl.DateTimeFormat("fr-FR", {
+    timeZone:"Europe/Paris", weekday:"long", day:"2-digit", month:"long", hour:"2-digit", minute:"2-digit"
+  }).format(new Date());
+
+  const state = {
+    creditsNow: 10000,
+    goal: 50000,
+    sessionDone: { morning:false, afternoon:false, evening:false, dateKey:"" },
+    watch: [],
+    trades: [],
+    listing: { marketMin:0, myBin:0, duration:"1h" }
+  };
+
+  function load(){
+    const raw = localStorage.getItem(LS_KEY);
+    if(raw){
+      try{
+        const parsed = JSON.parse(raw);
+        Object.assign(state, parsed);
+      }catch(e){}
+    }
+  }
+  function save(){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+
+  function sessionInfo(){
+    // 3 sessions simples : matin (06-12), aprem (12-18), soir (18-02)
+    const d = new Date();
+    const hour = Number(new Intl.DateTimeFormat("fr-FR",{timeZone:"Europe/Paris", hour:"2-digit", hour12:false}).format(d));
+    const dateKey = new Intl.DateTimeFormat("fr-FR",{timeZone:"Europe/Paris", year:"numeric", month:"2-digit", day:"2-digit"}).format(d);
+
+    let slot = "morning", label="Matin", plan="Achats : mass-bidding 82–85 + 5 min scan";
+    let help="Checklist (20–30 min) : 1) 20–40 enchères 2) relist 1h 3) note tes prix.";
+    if(hour>=12 && hour<18){
+      slot="afternoon"; label="Après-midi"; plan="Relist : ajuster prix (−100/−200) + compléter 1 objectif rapide";
+      help="Checklist (20–30 min) : 1) relist tout 2) ajuster léger 3) vider doublons vendables.";
+    } else if(hour>=18 || hour<2){
+      slot="evening"; label="Soir"; plan="Volatilité : achats opportunistes + relist agressif 1h";
+      help="Checklist (30–45 min) : 1) achats sur creux 2) relist 1h 3) stop si spam/erreur webapp.";
+    }
+    return {slot, label, plan, help, dateKey};
+  }
+
+  function profitNet(buy, sell){
+    const net = (Number(sell)||0) * 0.95;
+    return Math.round(net - (Number(buy)||0));
+  }
+
+  function render(){
+    document.getElementById("today").textContent = nowParis();
+
+    document.getElementById("goalLabel").textContent = fmt(state.goal);
+    document.getElementById("creditsNow").textContent = fmt(state.creditsNow);
+
+    const totalProfit = state.trades.reduce((acc,t)=>acc + (Number(t.profit)||0),0);
+    const pEl = document.getElementById("profitTotal");
+    pEl.textContent = fmt(totalProfit);
+    pEl.className = "profit " + (totalProfit>=0 ? "good":"bad");
+
+    // Session
+    const s = sessionInfo();
+    // reset daily done if date changes
+    if(state.sessionDone.dateKey !== s.dateKey){
+      state.sessionDone = { morning:false, afternoon:false, evening:false, dateKey:s.dateKey };
+      save();
+    }
+    document.getElementById("sessionTag").textContent = s.label;
+    document.getElementById("sessionPlan").textContent = s.plan;
+    document.getElementById("sessionHelp").textContent = s.help;
+
+    const done = state.sessionDone[s.slot];
+    document.getElementById("toggleDoneBtn").textContent = done ? "✅ Fait" : "Marquer fait";
+
+    // Watchlist
+    document.getElementById("watchCount").textContent = state.watch.length;
+    const w = document.getElementById("watchList");
+    w.innerHTML = "";
+    state.watch.forEach((it, idx)=>{
+      const el = document.createElement("div");
+      el.className = "item";
+      el.innerHTML = `
+        <div>
+          <b>${escapeHtml(it.name)}</b><br/>
+          <small>Prix max enchère : ${fmt(it.max)} | Note: ${escapeHtml(it.note||"")}</small>
+        </div>
+        <div class="actions">
+          <button class="iconbtn" title="Copier le nom" onclick="copyText('${jsStr(it.name)}')">⧉</button>
+          <button class="iconbtn" title="Supprimer" onclick="delWatch(${idx})">✕</button>
+        </div>
+      `;
+      w.appendChild(el);
+    });
+
+    // Trades
+    document.getElementById("tradeCount").textContent = state.trades.length;
+    const t = document.getElementById("tradeList");
+    t.innerHTML = "";
+    state.trades.slice().reverse().forEach((tr, revIdx)=>{
+      const idx = state.trades.length - 1 - revIdx;
+      const profClass = tr.profit >= 0 ? "good":"bad";
+      const el = document.createElement("div");
+      el.className="item";
+      el.innerHTML = `
+        <div>
+          <b>${escapeHtml(tr.name || "Trade")}</b>
+          <span class="tag" style="margin-left:8px">Achat ${fmt(tr.buy)} → Vente ${fmt(tr.sell)}</span><br/>
+          <small>${escapeHtml(tr.date)}</small>
+        </div>
+        <div class="actions">
+          <span class="profit ${profClass}">${fmt(tr.profit)}</span>
+          <button class="iconbtn" title="Supprimer" onclick="delTrade(${idx})">✕</button>
+        </div>
+      `;
+      t.appendChild(el);
+    });
+
+    // Listings helper
+    document.getElementById("durationSel").value = state.listing.duration || "1h";
+    document.getElementById("durationLabel").textContent = state.listing.duration || "1h";
+    document.getElementById("marketMin").value = state.listing.marketMin || "";
+    document.getElementById("myBin").value = state.listing.myBin || "";
+  }
+
+  // helpers
+  function escapeHtml(str){
+    return String(str ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+  }
+  function jsStr(str){ return String(str ?? "").replaceAll("\\","\\\\").replaceAll("'","\\'"); }
+  async function copyText(text){
+    try{ await navigator.clipboard.writeText(text); }catch(e){}
+  }
+
+  // events: calculator
+  const buyPrice = document.getElementById("buyPrice");
+  const sellPrice = document.getElementById("sellPrice");
+  function updateCalc(){
+    const buy = Number(buyPrice.value||0);
+    const sell = Number(sellPrice.value||0);
+    const tax = Math.round(sell * 0.05);
+    const net = Math.round(sell * 0.95);
+    const prof = profitNet(buy, sell);
+
+    document.getElementById("taxValue").textContent = fmt(tax);
+    document.getElementById("netValue").textContent = fmt(net);
+
+    const pv = document.getElementById("profitValue");
+    pv.textContent = fmt(prof);
+    pv.className = "profit " + (prof>=0 ? "good":"bad");
+  }
+  buyPrice.addEventListener("input", updateCalc);
+  sellPrice.addEventListener("input", updateCalc);
+
+  document.getElementById("addTradeBtn").addEventListener("click", ()=>{
+    const name = document.getElementById("playerName").value.trim();
+    const buy = Number(buyPrice.value||0);
+    const sell = Number(sellPrice.value||0);
+    if(!buy || !sell) return alert("Entre un achat et une vente.");
+    const prof = profitNet(buy, sell);
+
+    state.trades.push({
+      name: name || "Trade",
+      buy, sell, profit: prof,
+      date: nowParis()
+    });
+
+    // Option: update credits now if you want:
+    // state.creditsNow += prof;
+
+    buyPrice.value = "";
+    sellPrice.value = "";
+    document.getElementById("playerName").value = "";
+    updateCalc();
+    save(); render();
+  });
+
+  // credits set
+  document.getElementById("setCreditsBtn").addEventListener("click", ()=>{
+    const v = prompt("Crédits actuels ?", state.creditsNow);
+    if(v===null) return;
+    const n = Math.max(0, Number(v)||0);
+    state.creditsNow = Math.round(n);
+    save(); render();
+  });
+
+  // session done toggle
+  document.getElementById("toggleDoneBtn").addEventListener("click", ()=>{
+    const s = sessionInfo();
+    state.sessionDone[s.slot] = !state.sessionDone[s.slot];
+    save(); render();
+  });
+
+  // watchlist
+  document.getElementById("addWatchBtn").addEventListener("click", ()=>{
+    const name = document.getElementById("watchName").value.trim();
+    const max = Number(document.getElementById("watchMax").value||0);
+    if(!name || !max) return alert("Ajoute un nom + un prix max.");
+    state.watch.push({name, max: Math.round(max), note:""});
+    document.getElementById("watchName").value = "";
+    document.getElementById("watchMax").value = "";
+    save(); render();
+  });
+
+  document.getElementById("seedWatchBtn").addEventListener("click", ()=>{
+    const seeds = [
+      {name:"84 fodder (enchères)", max: 900},
+      {name:"83 fodder (enchères)", max: 650},
+      {name:"Shadow (style)", max: 1500},
+      {name:"Hunter (style)", max: 1500},
+      {name:"Position RB→RWB", max: 900}
+    ];
+    state.watch = [...seeds, ...state.watch].slice(0, 30);
+    save(); render();
+  });
+
+  window.delWatch = (idx)=>{
+    state.watch.splice(idx,1);
+    save(); render();
+  };
+
+  window.delTrade = (idx)=>{
+    state.trades.splice(idx,1);
+    save(); render();
+  };
+
+  // listings helper
+  const marketMin = document.getElementById("marketMin");
+  const myBin = document.getElementById("myBin");
+  function syncBinFromMin(){
+    const m = Number(marketMin.value||0);
+    state.listing.marketMin = m ? Math.round(m) : 0;
+    if(m){
+      state.listing.myBin = Math.max(0, Math.round(m - 100));
+      myBin.value = state.listing.myBin;
+    } else {
+      state.listing.myBin = 0;
+      myBin.value = "";
+    }
+    save(); render();
+  }
+  marketMin.addEventListener("input", syncBinFromMin);
+  myBin.addEventListener("input", ()=>{
+    const v = Number(myBin.value||0);
+    state.listing.myBin = v ? Math.round(v) : 0;
+    save(); render();
+  });
+  document.querySelectorAll(".iconbtn[data-step]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const step = Number(btn.getAttribute("data-step"));
+      const v = Number(myBin.value||0);
+      const nv = Math.max(0, Math.round(v + step));
+      myBin.value = nv;
+      state.listing.myBin = nv;
+      save(); render();
+    });
+  });
+  document.getElementById("durationSel").addEventListener("change", (e)=>{
+    state.listing.duration = e.target.value;
+    save(); render();
+  });
+
+  // export csv
+  document.getElementById("exportBtn").addEventListener("click", ()=>{
+    const rows = [["date","name","buy","sell","profit"]];
+    state.trades.forEach(t=>rows.push([t.date, t.name, t.buy, t.sell, t.profit]));
+    const csv = rows.map(r=>r.map(x=> `"${String(x).replaceAll('"','""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "fc26_trades.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // reset
+  document.getElementById("resetBtn").addEventListener("click", ()=>{
+    if(!confirm("Reset complet ? (watchlist + trades + settings)")) return;
+    localStorage.removeItem(LS_KEY);
+    location.reload();
+  });
+
+  // init
+  load();
+  updateCalc();
+  render();
+
+  // live clock
+  setInterval(()=> {
+    document.getElementById("today").textContent = nowParis();
+  }, 15000);
+</script>
+</body>
+</html>
